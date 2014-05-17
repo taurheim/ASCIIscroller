@@ -1,9 +1,11 @@
 #include "windows.h"
+HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 #include "entity.h"
 #include "level.h"
 #include <string>
 #include "gfx.h"
 #include <vector>
+#include "physics.h"
 
 
 static int UP = 1;
@@ -11,7 +13,7 @@ static int RIGHT = 2;
 static int DOWN = 3;
 static int LEFT = 4;
 
-std::vector<Entity> entities;
+std::vector<Entity> all_entities;
 
 
 bool isEmpty(_COORD pos){
@@ -48,47 +50,59 @@ int main() {
     SetConsoleScreenBufferSize(h, coord);            // Set Buffer Size
     SetConsoleWindowInfo(h, TRUE, &Rect);            // Set Window Size
 
+    //Hide cursor
+
+    CONSOLE_CURSOR_INFO ConCurInf;
+    ConCurInf.dwSize = 10;
+    ConCurInf.bVisible = FALSE;
+    SetConsoleCursorInfo(h, &ConCurInf);
+
     //Draw the GUI
     drawGUI();
 
-
-
     //Load level 1
     Level currentlevel;
-    currentlevel.spawn.X = 5;
-    currentlevel.spawn.Y = 5;
 
     //Get things on screen
-    entities = currentlevel.getEntities();
+    all_entities = currentlevel.getEntities();
 
     //Initialize Player
-    Entity player("player");
-    entities.push_back (player);
+    Entity player(25); //Create the entity (25 is player type)
+    player.position.X = currentlevel.spawn.X; //Set player's position to the spawn
+    player.position.Y = currentlevel.spawn.Y;
+    all_entities.push_back (player); //Put player in our entity vector
 
+    //This object holds all of our gfx layers
     layers all_layers;
 
-    char *player_char = &all_layers.player[5][10];
-    *player_char = 'P';
-
-    char *enemy_char = &all_layers.enemies[5][10];
-    *enemy_char = 'Q';
-
-    draw_all_layers(all_layers);
-
+    //Put level mesh into a layer
+    all_layers.load_level(currentlevel.level_mesh);
 
     //Game loop
     while(isRunning){
-        //Check for inputs
+        //Check for inputs (BROKEN)
+        //if(GetAsyncKeyState(VK_LEFT)){
+        //    std::cout << "Rah";
+        //}
 
-        /*if(GetAsyncKeyState(VK_UP)){
-            _COORD above;
-            above.X = player.position.X;
-            above.Y = player.position.Y;
-            if(isEmpty(above)){
-                player.move(above);
-            }
+        //Run physics (for now, just move everything down)
+        for(Entity& ent : all_entities){
+            runPhysics(ent,currentlevel.level_mesh);
         }
 
+        //The following three functions will:
+        // 1. Empty our 3 layers (player, enemies, objects)
+        // 2. Draw all of our entities on to their respective layers
+        // 3. Compress all 3 of the layers (+level layer) into one layer
+        all_layers.wipe_layers();
+        parseGFX(all_entities,all_layers);
+        all_layers.compress_layers();
+
+        //Draw our compressed layer
+        drawLayer(all_layers.compressed_layer, 0x0B,true);
+
+
+/*
         if(GetAsyncKeyState(VK_LEFT)){
             _COORD left;
             left.X = player.position.X-1;
@@ -108,15 +122,6 @@ int main() {
         }*/
 
 
-        // Check for collisions
-
-        // Draw current states
-
-
-
-
-
-        Sleep(30);
     };
 
     return 0;

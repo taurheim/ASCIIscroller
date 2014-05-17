@@ -3,7 +3,7 @@
 
 class Entity {
     public:
-        std::string type;
+        int type;
         _COORD position;
         bool isMoving;
         int faceDir;
@@ -27,7 +27,7 @@ class Entity {
 
         }
 
-        Entity(std::string t){
+        Entity(int t){
             type = t;
         };
 };
