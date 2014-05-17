@@ -8,10 +8,7 @@ HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 #include "physics.h"
 
 
-static int UP = 1;
-static int RIGHT = 2;
-static int DOWN = 3;
-static int LEFT = 4;
+
 
 std::vector<Entity> all_entities;
 
@@ -25,10 +22,16 @@ bool isEmpty(_COORD pos){
 }
 
 
-bool isRunning = true;
 
 int main() {
-
+    //Game loop setup
+    const int TICKS_PER_SECOND = 30;
+    const int SKIP_TICKS = 1000/ TICKS_PER_SECOND;
+    const int MAX_FRAMESKIP = 5;
+    DWORD next_game_tick = GetTickCount();
+    int loops;
+    float interpolation;
+    bool isRunning = true;
 
     //Initialize the game:
     //  - Set up window
@@ -81,26 +84,30 @@ int main() {
     //Game loop
 
     while(isRunning){
-        //Check for inputs (BROKEN)
-
-        //Run physics (for now, just move everything down)
-        for(Entity& ent : all_entities){
-            runPhysics(ent,currentlevel.level_mesh);
-            if(ent.type == 25){
-                if(GetAsyncKeyState(VK_LEFT)){
-                    _COORD left;
-                    left.X = ent.position.X -1;
-                    left.Y = ent.position.Y;
-                    ent.move(left);
-                }
-                if(GetAsyncKeyState(VK_RIGHT)){
-                    _COORD left;
-                    left.X = ent.position.X +1;
-                    left.Y = ent.position.Y;
-                    ent.move(left);
+        loops = 0;
+        while(GetTickCount() > next_game_tick && loops < MAX_FRAMESKIP){
+            for(Entity& ent : all_entities){
+                runPhysics(ent,currentlevel.level_mesh);
+                if(ent.type == 25){
+                    ent.isMoving = false;
+                    if(GetAsyncKeyState(VK_LEFT)){
+                        ent.isMoving = true;
+                        ent.moveDir = LEFT;
+                    }
+                    if(GetAsyncKeyState(VK_RIGHT)){
+                        ent.isMoving = true;
+                        ent.moveDir = RIGHT;
+                    }
+                    if(GetAsyncKeyState(VK_UP) && !ent.isJumping){
+                        ent.isJumping = true;
+                    }
                 }
             }
+
+            next_game_tick += SKIP_TICKS;
+            loops++;
         }
+
 
         //The following three functions will:
         // 1. Empty our 3 layers (player, enemies, objects)

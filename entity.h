@@ -5,9 +5,15 @@ class Entity {
     public:
         int type;
         _COORD position;
+        bool uses_gravity;
+
         bool isMoving;
+        bool isJumping;
+
+        int jumpState;
         int faceDir;
         int moveDir;
+
 
         int shield_count;
 
@@ -29,5 +35,10 @@ class Entity {
 
         Entity(int t){
             type = t;
+            if(t==8){
+                uses_gravity = false;
+            } else {
+                uses_gravity = true;
+            }
         };
 };
