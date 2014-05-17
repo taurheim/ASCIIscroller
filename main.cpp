@@ -64,7 +64,7 @@ int main() {
     Level currentlevel;
 
     //Get things on screen
-    all_entities = currentlevel.getEntities();
+    currentlevel.pushEntitiesTo(all_entities);
 
     //Initialize Player
     Entity player(25); //Create the entity (25 is player type)
@@ -79,15 +79,27 @@ int main() {
     all_layers.load_level(currentlevel.level_mesh);
 
     //Game loop
+
     while(isRunning){
         //Check for inputs (BROKEN)
-        //if(GetAsyncKeyState(VK_LEFT)){
-        //    std::cout << "Rah";
-        //}
 
         //Run physics (for now, just move everything down)
         for(Entity& ent : all_entities){
             runPhysics(ent,currentlevel.level_mesh);
+            if(ent.type == 25){
+                if(GetAsyncKeyState(VK_LEFT)){
+                    _COORD left;
+                    left.X = ent.position.X -1;
+                    left.Y = ent.position.Y;
+                    ent.move(left);
+                }
+                if(GetAsyncKeyState(VK_RIGHT)){
+                    _COORD left;
+                    left.X = ent.position.X +1;
+                    left.Y = ent.position.Y;
+                    ent.move(left);
+                }
+            }
         }
 
         //The following three functions will:
@@ -120,10 +132,9 @@ int main() {
                 player.move(right);
             }
         }*/
-
+    std::cout << rand();
 
     };
-
     return 0;
 }
 

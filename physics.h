@@ -9,5 +9,6 @@ void runPhysics(Entity& ent, char mesh[][95]){
         *posy = *posy + 1;
     }
 
+
     //std::cout << "(" << *posx << "," << *posy << ")";
 }

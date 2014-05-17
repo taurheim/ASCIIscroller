@@ -93,7 +93,17 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
     _COORD draw_anchor;
     draw_anchor.X = 3;
     draw_anchor.Y = 2;
+    //New Draw function
 
+    //USE THIS: http://www.tomshardware.com/forum/65918-13-technique-fast-win32-console-drawing
+
+    for(int d_y=0;d_y<22;d_y++){
+        SetConsoleCursorPosition(h,draw_anchor);
+        std::cout << layer[d_y] << std::endl;
+        draw_anchor.Y++;
+    }
+
+    /*Old draw function
     for(int d_y=0;d_y<22;d_y++){
         draw_anchor.X = 3;
         for(int d_x=0;d_x<94;d_x++){
@@ -124,6 +134,7 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
         }
         draw_anchor.Y++;
     }
+    */
 
     SetConsoleTextAttribute(h, 0x0A);
 }
