@@ -76,7 +76,12 @@ char game_gui[34][101]{
 
 
 CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
-
+const int SCREEN_HEIGHT = 34;
+const int SCREEN_WIDTH = 101;
+CHAR_INFO buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
+COORD dwBufferSize = { SCREEN_WIDTH, SCREEN_HEIGHT };
+COORD dwBufferCoord = { 0, 0 };
+SMALL_RECT rcRegion = { 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 };
 
 void drawGUI(){
     //SetConsoleTextAttribute(h,0x70);
@@ -96,13 +101,15 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
     //New Draw function
 
     //USE THIS: http://www.tomshardware.com/forum/65918-13-technique-fast-win32-console-drawing
+    WriteConsoleOutput( h, (CHAR_INFO *)buffer, dwBufferSize, dwBufferCoord, &rcRegion );
 /*
     for(int d_y=0;d_y<22;d_y++){
         SetConsoleCursorPosition(h,draw_anchor);
         std::cout << layer[d_y] << std::endl;
         draw_anchor.Y++;
-    }
-*/
+    }*/
+
+
     //Old draw function
     for(int d_y=0;d_y<22;d_y++){
         draw_anchor.X = 3;
@@ -111,43 +118,48 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
                 switch(layer[d_y][d_x]){
                 case ' ':
                     {
-                        SetConsoleTextAttribute(h,0x00);
+                        buffer[d_y][d_x].Attributes = 0x00;
                         break;
                     }
                 case '#':
                     {
-                        SetConsoleTextAttribute(h,0x88);
+                        buffer[d_y][d_x].Attributes = 0x88;
                         break;
                     }
                 case 'p':
                 case 'q':
                     {
-                        SetConsoleTextAttribute(h,0x0A);
+                        buffer[d_y][d_x].Attributes = 0x0A;
                         break;
                     }
                 case 'm':
+                case '\\':
+                case '-':
+                case '/':
                     {
-                        SetConsoleTextAttribute(h,0x0C);
+                        buffer[d_y][d_x].Attributes = 0x0C;
+                        break;
+                    }
+                case '<':
+                case '>':
+                    {
+                        buffer[d_y][d_x].Attributes = 0x0E;
                         break;
                     }
                 default:
                     {
-                        SetConsoleTextAttribute(h,col);
+                        buffer[d_y][d_x].Attributes = col;
                         break;
                     }
 
 
                 }
-                SetConsoleCursorPosition(h,draw_anchor);
-                std::cout << layer[d_y][d_x];
+                buffer[d_y][d_x].Char.AsciiChar = layer[d_y][d_x];
             }
             draw_anchor.X++;
         }
         draw_anchor.Y++;
     }
-
-
-    SetConsoleTextAttribute(h, 0x0A);
 }
 class layers {
     public:
@@ -182,11 +194,11 @@ class layers {
             for(int d_y=0;d_y<24;d_y++){
                 for(int d_x=0;d_x<94;d_x++){
                     compressed_layer[d_y][d_x] = ' ';
-                    if(level[d_y][d_x] != ' '){
-                        compressed_layer[d_y][d_x] = level[d_y][d_x];
-                    }
                     if(game_objects[d_y][d_x] != ' '){
                         compressed_layer[d_y][d_x] = game_objects[d_y][d_x];
+                    }
+                    if(level[d_y][d_x] != ' '){
+                        compressed_layer[d_y][d_x] = level[d_y][d_x];
                     }
                     if(enemies[d_y][d_x] != ' '){
                         compressed_layer[d_y][d_x] = enemies[d_y][d_x];
@@ -208,11 +220,24 @@ void draw_all_layers(layers l){
 
 void parseGFX(std::vector<Entity> e_list, layers& l_list) {
     for(Entity ent : e_list){
+        if(!ent.isDead){
         switch(ent.type){
         case 8: //Slow moving bat
             {
                 char *entity_char = &l_list.enemies[ent.position.Y][ent.position.X];
                 *entity_char = 'm';
+                char *leftwing = &l_list.game_objects[ent.position.Y][ent.position.X-1];
+                char *rightwing = &l_list.game_objects[ent.position.Y][ent.position.X+1];
+                if(ent.animation_frame%3 == 0){
+                    *leftwing = '\\';
+                    *rightwing = '/';
+                } else if(ent.animation_frame%3 == 1){
+                    *leftwing = '-';
+                    *rightwing = '-';
+                } else {
+                    *leftwing = '/';
+                    *rightwing = '\\';
+                }
                 break;
             }
         case 25: //Player
@@ -223,11 +248,17 @@ void parseGFX(std::vector<Entity> e_list, layers& l_list) {
                 } else {
                     *entity_char = 'q';
                 }
+                if(ent.shield_count == 1){
+                    char *leftshield = &l_list.game_objects[ent.position.Y][ent.position.X-1];
+                    char *rightshield = &l_list.game_objects[ent.position.Y][ent.position.X+1];
+                    *leftshield = '(';
+                    *rightshield = ')';
+                }
                 break;
             }
         case 21: //Projectile
             {
-                char *entity_char = &l_list.player[ent.position.Y][ent.position.X];
+                char *entity_char = &l_list.game_objects[ent.position.Y][ent.position.X];
                 if(ent.faceRight){
                     *entity_char = '>';
                 } else {
@@ -238,6 +269,7 @@ void parseGFX(std::vector<Entity> e_list, layers& l_list) {
             //Do nothing
             break;
         }
+            }
     };
 };
 /*

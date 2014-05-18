@@ -6,6 +6,7 @@ HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 #include "gfx.h"
 #include <vector>
 #include "physics.h"
+#include "ai.h"
 
 
 
@@ -73,6 +74,7 @@ int main() {
     Entity player(25); //Create the entity (25 is player type)
     player.position.X = currentlevel.spawn.X; //Set player's position to the spawn
     player.position.Y = currentlevel.spawn.Y;
+    player.shield_count = 1;
     all_entities.push_back (player); //Put player in our entity vector
 
     //This object holds all of our gfx layers
@@ -81,14 +83,17 @@ int main() {
     //Put level mesh into a layer
     all_layers.load_level(currentlevel.level_mesh);
 
-    //Game loop
-
     while(isRunning){
         loops = 0;
         while(GetTickCount() > next_game_tick && loops < MAX_FRAMESKIP){
             for(Entity& ent : all_entities){
+                if(!ent.isDead){
                 runPhysics(ent,currentlevel.level_mesh);
-                if(ent.type == 25){
+                run_ai(ent);
+                if(ent.type == 8){
+                } else if(ent.type == 21){
+                }
+                 else if(ent.type == 25){ //Player Input Handling
                     ent.isMoving = false;
                     if(GetAsyncKeyState(VK_LEFT)){
                         ent.isMoving = true;
@@ -116,6 +121,21 @@ int main() {
                         all_entities.push_back(projectile);
                     }
                 }
+                }
+            }
+
+            //Now that we've updated the movement of all entities, do a collision check.
+            for(Entity& proj : all_entities){
+                if((proj.type==21 || proj.type==25 )&& !proj.isDead){
+                    //Projectile, check against all other entities for collisions
+                    for(Entity& ent : all_entities){
+                        if(!ent.isDead && ent.type==8 && (ent.position.X == proj.position.X || (ent.position.X == proj.position.X-1 && proj.faceRight) || (ent.position.X == proj.position.X+1 && !proj.faceRight)) && ent.position.Y == proj.position.Y){
+                            //std::cout << "Collision" << rand();
+                            ent.isDead = true;
+                            proj.isDead = true;
+                        }
+                    }
+                }
             }
 
             next_game_tick += SKIP_TICKS;
@@ -130,6 +150,7 @@ int main() {
         all_layers.wipe_layers();
         parseGFX(all_entities,all_layers);
         all_layers.compress_layers();
+
 
         //Draw our compressed layer
         drawLayer(all_layers.compressed_layer, 0x0B,true);

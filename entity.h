@@ -8,6 +8,8 @@ const int LEFT = 4;
 
 class Entity {
     public:
+        bool isDead;
+
         int type;
         _COORD position;
         bool uses_gravity;
@@ -20,6 +22,8 @@ class Entity {
 
         bool faceRight;
         int moveDir;
+
+        int animation_frame;
 
 
         int shield_count;
@@ -46,6 +50,8 @@ class Entity {
             isJumping = false;
             isMoving = false;
             faceRight = true;
+            isDead = false;
+            animation_frame = 0;
             switch(t){
                 case 8:
                     {
