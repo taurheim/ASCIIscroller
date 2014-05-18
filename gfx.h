@@ -96,14 +96,14 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
     //New Draw function
 
     //USE THIS: http://www.tomshardware.com/forum/65918-13-technique-fast-win32-console-drawing
-
+/*
     for(int d_y=0;d_y<22;d_y++){
         SetConsoleCursorPosition(h,draw_anchor);
         std::cout << layer[d_y] << std::endl;
         draw_anchor.Y++;
     }
-
-    /*Old draw function
+*/
+    //Old draw function
     for(int d_y=0;d_y<22;d_y++){
         draw_anchor.X = 3;
         for(int d_x=0;d_x<94;d_x++){
@@ -117,6 +117,17 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
                 case '#':
                     {
                         SetConsoleTextAttribute(h,0x88);
+                        break;
+                    }
+                case 'p':
+                case 'q':
+                    {
+                        SetConsoleTextAttribute(h,0x0A);
+                        break;
+                    }
+                case 'm':
+                    {
+                        SetConsoleTextAttribute(h,0x0C);
                         break;
                     }
                 default:
@@ -134,7 +145,7 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
         }
         draw_anchor.Y++;
     }
-    */
+
 
     SetConsoleTextAttribute(h, 0x0A);
 }
@@ -207,8 +218,21 @@ void parseGFX(std::vector<Entity> e_list, layers& l_list) {
         case 25: //Player
             {
                 char *entity_char = &l_list.player[ent.position.Y][ent.position.X];
-                *entity_char = 'p';
+                if(ent.faceRight){
+                    *entity_char = 'p';
+                } else {
+                    *entity_char = 'q';
+                }
                 break;
+            }
+        case 21: //Projectile
+            {
+                char *entity_char = &l_list.player[ent.position.Y][ent.position.X];
+                if(ent.faceRight){
+                    *entity_char = '>';
+                } else {
+                    *entity_char = '<';
+                }
             }
         default:
             //Do nothing

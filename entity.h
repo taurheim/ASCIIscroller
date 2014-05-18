@@ -1,6 +1,11 @@
 #include "windows.h"
 #include <string>
 
+const int UP = 1;
+const int RIGHT = 2;
+const int DOWN = 3;
+const int LEFT = 4;
+
 class Entity {
     public:
         int type;
@@ -11,7 +16,9 @@ class Entity {
         bool isJumping;
 
         int jumpState;
-        int faceDir;
+        int jumpHeight;
+
+        bool faceRight;
         int moveDir;
 
 
@@ -35,10 +42,30 @@ class Entity {
 
         Entity(int t){
             type = t;
-            if(t==8){
-                uses_gravity = false;
-            } else {
-                uses_gravity = true;
+            jumpHeight = 4;
+            isJumping = false;
+            isMoving = false;
+            faceRight = true;
+            switch(t){
+                case 8:
+                    {
+                        uses_gravity=false;
+                        isMoving=true;
+                        moveDir= RIGHT;
+                        break;
+                    }
+                case 21:
+                    {
+                        uses_gravity=false;
+                        isMoving=true;
+                        break;
+                    }
+                default:
+                    {
+                        uses_gravity = true;
+                        break;
+                    }
+
             }
         };
 };

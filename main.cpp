@@ -25,7 +25,7 @@ bool isEmpty(_COORD pos){
 
 int main() {
     //Game loop setup
-    const int TICKS_PER_SECOND = 30;
+    const int TICKS_PER_SECOND = 20;
     const int SKIP_TICKS = 1000/ TICKS_PER_SECOND;
     const int MAX_FRAMESKIP = 5;
     DWORD next_game_tick = GetTickCount();
@@ -98,8 +98,22 @@ int main() {
                         ent.isMoving = true;
                         ent.moveDir = RIGHT;
                     }
-                    if(GetAsyncKeyState(VK_UP) && !ent.isJumping){
+                    if(GetAsyncKeyState(VK_UP) && !ent.isJumping && ent.jumpState==0){
                         ent.isJumping = true;
+                        ent.jumpState = 0;
+                    }
+                    if(GetAsyncKeyState(VK_SPACE)){
+                        Entity projectile(21);
+                        projectile.faceRight = ent.faceRight;
+                        if(ent.faceRight){
+                            projectile.moveDir = RIGHT;
+                            projectile.position.X = ent.position.X+1;
+                        } else {
+                            projectile.moveDir = LEFT;
+                            projectile.position.X = ent.position.X-1;
+                        }
+                        projectile.position.Y = ent.position.Y;
+                        all_entities.push_back(projectile);
                     }
                 }
             }
@@ -139,7 +153,7 @@ int main() {
                 player.move(right);
             }
         }*/
-    std::cout << rand();
+
 
     };
     return 0;
