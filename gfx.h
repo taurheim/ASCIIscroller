@@ -68,7 +68,7 @@ char game_gui[34][101]{
 "|    +++++   ++     ++++++                                                ++++++          +++++    |",
 "|   ++ ++++     +++++                                                          +++++     ++++ ++   |",
 "|      +++++  +++                                                                  +++  +++++      |",
-"|      +++++++                                                                        +++++++      |",
+"|      +++++++           Gold:           Keys:              Bolts left:               +++++++      |",
 "|++++++++++++                                                                          ++++++++++++|",
 "@--------------------------------------------------------------------------------------------------@"
 
@@ -76,12 +76,48 @@ char game_gui[34][101]{
 
 
 CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
-const int SCREEN_HEIGHT = 34;
-const int SCREEN_WIDTH = 101;
+const int SCREEN_HEIGHT = 23;
+const int SCREEN_WIDTH = 95;
 CHAR_INFO buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
 COORD dwBufferSize = { SCREEN_WIDTH, SCREEN_HEIGHT };
 COORD dwBufferCoord = { 0, 0 };
-SMALL_RECT rcRegion = { 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 };
+SMALL_RECT rcRegion = { 3, 2, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 };
+
+void writeLevelName(std::string name){
+    _COORD draw_anchor;
+    draw_anchor.X = 35;
+    draw_anchor.Y = 28;
+
+    SetConsoleCursorPosition(h,draw_anchor);
+    std::cout << name;
+}
+
+void updateGold(int gold){
+    _COORD draw_anchor;
+    draw_anchor.X = 30;
+    draw_anchor.Y = 31;
+
+    SetConsoleCursorPosition(h,draw_anchor);
+    std::cout << gold;
+}
+
+void updateKeys(int keys){
+    _COORD draw_anchor;
+    draw_anchor.X = 46;
+    draw_anchor.Y = 31;
+
+    SetConsoleCursorPosition(h,draw_anchor);
+    std::cout << keys;
+}
+
+void updateAttacks(int attacks){
+    _COORD draw_anchor;
+    draw_anchor.X = 71;
+    draw_anchor.Y = 31;
+
+    SetConsoleCursorPosition(h,draw_anchor);
+    std::cout << attacks;
+}
 
 void drawGUI(){
     //SetConsoleTextAttribute(h,0x70);
@@ -101,7 +137,7 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
     //New Draw function
 
     //USE THIS: http://www.tomshardware.com/forum/65918-13-technique-fast-win32-console-drawing
-    WriteConsoleOutput( h, (CHAR_INFO *)buffer, dwBufferSize, dwBufferCoord, &rcRegion );
+
 /*
     for(int d_y=0;d_y<22;d_y++){
         SetConsoleCursorPosition(h,draw_anchor);
@@ -121,18 +157,18 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
                         buffer[d_y][d_x].Attributes = 0x00;
                         break;
                     }
-                case '#':
+                case '#': //Wall
                     {
                         buffer[d_y][d_x].Attributes = 0x88;
                         break;
                     }
-                case 'p':
+                case 'p': //Player
                 case 'q':
                     {
                         buffer[d_y][d_x].Attributes = 0x0A;
                         break;
                     }
-                case 'm':
+                case 'm': //Bat
                 case '\\':
                 case '-':
                 case '/':
@@ -140,10 +176,38 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
                         buffer[d_y][d_x].Attributes = 0x0C;
                         break;
                     }
-                case '<':
+                case '<': //Projectile
                 case '>':
                     {
                         buffer[d_y][d_x].Attributes = 0x0E;
+                        break;
+                    }
+                case '\'': //Shields
+                case '"':
+                case '*':
+                    {
+                        buffer[d_y][d_x].Attributes = 0x0F;
+                        break;
+                    }
+                case 'O': //Mage
+                    {
+                        buffer[d_y][d_x].Attributes = 0x0B;
+                        break;
+                    }
+                case 'i': //Staff
+                    {
+                        buffer[d_y][d_x].Attributes = 0x09;
+                        break;
+                    }
+                case ')':
+                case '(':
+                    {
+                        buffer[d_y][d_x].Attributes = 0x0B;
+                        break;
+                    }
+                case ':':
+                    {
+                        buffer[d_y][d_x].Attributes = 0x07;
                         break;
                     }
                 default:
@@ -160,6 +224,7 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
         }
         draw_anchor.Y++;
     }
+    WriteConsoleOutput( h, (CHAR_INFO *)buffer, dwBufferSize, dwBufferCoord, &rcRegion );
 }
 class layers {
     public:
@@ -251,8 +316,18 @@ void parseGFX(std::vector<Entity> e_list, layers& l_list) {
                 if(ent.shield_count == 1){
                     char *leftshield = &l_list.game_objects[ent.position.Y][ent.position.X-1];
                     char *rightshield = &l_list.game_objects[ent.position.Y][ent.position.X+1];
-                    *leftshield = '(';
-                    *rightshield = ')';
+                    *leftshield = '\'';
+                    *rightshield = '\'';
+                } else if(ent.shield_count == 2){
+                    char *leftshield = &l_list.game_objects[ent.position.Y][ent.position.X-1];
+                    char *rightshield = &l_list.game_objects[ent.position.Y][ent.position.X+1];
+                    *leftshield = '"';
+                    *rightshield = '"';
+                } else if(ent.shield_count == 3){
+                    char *leftshield = &l_list.game_objects[ent.position.Y][ent.position.X-1];
+                    char *rightshield = &l_list.game_objects[ent.position.Y][ent.position.X+1];
+                    *leftshield = '*';
+                    *rightshield = '*';
                 }
                 break;
             }
@@ -264,6 +339,41 @@ void parseGFX(std::vector<Entity> e_list, layers& l_list) {
                 } else {
                     *entity_char = '<';
                 }
+                break;
+            }
+        case 22: //Water attack
+            {
+                char *entity_char = &l_list.game_objects[ent.position.Y][ent.position.X];
+                if(ent.faceRight){
+                    *entity_char = ')';
+                } else {
+                    *entity_char = '(';
+                }
+                if(ent.faceRight){
+                    char *tail1 = &l_list.game_objects[ent.position.Y][ent.position.X-1];
+                    char *tail2 = &l_list.game_objects[ent.position.Y][ent.position.X-2];
+                    *tail1 = ':';
+                    *tail2 = ':';
+                } else {
+                    char *tail1 = &l_list.game_objects[ent.position.Y][ent.position.X+1];
+                    char *tail2 = &l_list.game_objects[ent.position.Y][ent.position.X+2];
+                    *tail1 = ':';
+                    *tail2 = ':';
+                }
+                break;
+            }
+        case 3: //Level 1 Mage
+            {
+                char *entity_char = &l_list.enemies[ent.position.Y][ent.position.X];
+                *entity_char = 'O';
+                if(ent.faceRight){
+                    char *staff = &l_list.game_objects[ent.position.Y][ent.position.X+1];
+                    *staff = 'i';
+                } else {
+                    char *staff = &l_list.game_objects[ent.position.Y][ent.position.X-1];
+                    *staff = 'i';
+                }
+                break;
             }
         default:
             //Do nothing

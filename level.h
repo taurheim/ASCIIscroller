@@ -5,21 +5,21 @@
 
 char level_1[23][95] = {
 "                  ########################################################                  ",
-"                  #     @                               h                #                  ",
-"                  #                     #########                        #                  ",
+"                  #     @                               m          3     #                  ",
+"                  #     #               #########                        #                  ",
 "                  #                #            #                        #                  ",
 "                  #        #####                #                        #                  ",
 "                  #                 #####       #                        #                  ",
 "                  #                      ##     #                        #                  ",
-"                  #           h                 #                        #                  ",
-"                  #                             #                        #                  ",
-"                  #                  ####################                #                  ",
+"                  #           m            #    #                        #                  ",
+"                  #                                   3                  #                  ",
+"                  #                  ####################     #######    #                  ",
 "                  #                     #               #                #                  ",
-"                  #        ######       #               #                #                  ",
+"                  #        ######       #               #              ###                  ",
 "                  #######################               #                #                  ",
+"                                                        #           ##   #                  ",
 "                                                        #                #                  ",
-"                                                        #                #                  ",
-"                                                        #                #                  ",
+"                                                        #         #      #                  ",
 "                          ##  ##                        ##################                  ",
 "                          ##  ##                        ##################                  ",
 "                                                        ##################                  ",
@@ -73,15 +73,16 @@ class Level {
                         //We've found an entity -> Create it!
                         switch(level_mesh[d_y][d_x]){
                             case '@':
-                                std::cout << "Spawn found at " << d_x << "," << d_y << std::endl;
                                 spawn.X = d_x;
                                 spawn.Y = d_y;
                                 *entity_char = ' ';
                                 break;
-                            case 'h':
-                                std::cout << "Level 1 bat found at " << d_x << "," << d_y << std::endl;
+                            case 'm':
                                 entity_type = 8;
                                 //entity_list.push_back (new_entity);
+                                break;
+                            case '3':
+                                entity_type = 3;
                                 break;
                             default:
                                 std::cout << "Unknown entity found named: " << level_mesh[d_y][d_x];

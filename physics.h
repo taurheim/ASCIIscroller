@@ -44,7 +44,7 @@ void runPhysics(Entity& ent, char mesh[][95]){
             } else {
                 *moveDir = RIGHT;
             }
-        } else if(ent.type == 21){
+        } else if(ent.type == 21 || ent.type == 22){
             //Projectile is hitting a wall
             *isDead = true;
         }

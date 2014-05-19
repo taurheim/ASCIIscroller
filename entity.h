@@ -24,14 +24,9 @@ class Entity {
         int moveDir;
 
         int animation_frame;
-
+        bool isAttacking;
 
         int shield_count;
-
-        std::string ai_type;
-
-        std::string current_action;
-        std::string current_frame;
 
         void tick();
 
@@ -51,7 +46,9 @@ class Entity {
             isMoving = false;
             faceRight = true;
             isDead = false;
+            isAttacking = false;
             animation_frame = 0;
+            shield_count = 0;
             switch(t){
                 case 8:
                     {
@@ -61,6 +58,7 @@ class Entity {
                         break;
                     }
                 case 21:
+                case 22:
                     {
                         uses_gravity=false;
                         isMoving=true;
