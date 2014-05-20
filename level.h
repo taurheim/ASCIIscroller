@@ -1,6 +1,7 @@
 #include "windows.h"
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 
 char level_1[23][95] = {
@@ -34,6 +35,9 @@ class Level {
         _COORD level_anchor;
         _COORD spawn;
         char level_mesh[23][95];
+        int shields;
+        int bolts;
+        int enemy_count = 0;
 
         void pushEntitiesTo(std::vector<Entity> & dest){
             /*
@@ -47,9 +51,9 @@ class Level {
             cmd_pointer.Y = 0;
 
 
-            for(int d_y=0;d_y<23;d_y++){
+            for(int d_y=0;d_y<21;d_y++){
                 cmd_pointer.X = 0;
-                for(int d_x=0;d_x<93;d_x++){
+                for(int d_x=0;d_x<92;d_x++){
 /*
                     int entity_type;
                     char *entity_char = &level_mesh[d_y][d_x];
@@ -79,13 +83,15 @@ class Level {
                                 break;
                             case 'm':
                                 entity_type = 8;
+                                enemy_count++;
                                 //entity_list.push_back (new_entity);
                                 break;
                             case '3':
                                 entity_type = 3;
+                                enemy_count++;
                                 break;
                             default:
-                                std::cout << "Unknown entity found named: " << level_mesh[d_y][d_x];
+                                std::cout << "Unknown entity found named: " << level_mesh[d_y][d_x] << " at (" << d_x << "," << d_y << ")";
                                 break;
                         }
                         if(*entity_char != '@'){
@@ -104,10 +110,37 @@ class Level {
             }
         }
 
-        Level(){
-            for(int ro=0;ro<24;ro++){
-                strcpy(level_mesh[ro],level_1[ro]);
+        Level(int currentlevel){
+            std::string result;
+            std::stringstream levelstream;
+            levelstream << "files/" << "level" << currentlevel << ".txt";
+            result = levelstream.str();
+
+            FILE * load_level;
+            std::cout << result.c_str();
+            load_level = fopen (result.c_str(),"r");
+
+            char loaded_level[21][95];
+
+            for(int r = 0; r < 21; ++r) // go through each line
+            {
+                for(int c = 0; c < 93; ++c) // go through each item
+                {
+                    char cha = fgetc(load_level);
+                    if(cha!= '\n'){
+                        level_mesh[r][c] = cha;
+                    }
+                }
             }
+            char line[256];
+            shields = atoi(fgets(line, sizeof(line),load_level));
+            bolts = atoi(fgets(line, sizeof(line),load_level));
+
+
+/*
+            for(int ro=0;ro<24;ro++){
+                strcpy(level_mesh[ro],load_level[ro]);
+            }*/
         };
 
 };

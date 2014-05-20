@@ -1,12 +1,14 @@
 #include "windows.h"
 HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 #include "entity.h"
+#include <fstream>
 #include "level.h"
 #include <string>
 #include "gfx.h"
 #include <vector>
 #include "physics.h"
 #include "ai.h"
+#include <conio.h>
 
 
 
@@ -25,6 +27,15 @@ bool isEmpty(_COORD pos){
 
 
 int main() {
+    //Here's where we're going to read/write from a file to set up the basic game
+
+    //Line 1: Current level
+    int current_level_num;
+
+
+
+
+
     //Game loop setup
     const int TICKS_PER_SECOND = 20;
     const int SKIP_TICKS = 1000/ TICKS_PER_SECOND;
@@ -34,7 +45,6 @@ int main() {
     float interpolation;
     bool isRunning = true;
 
-    int attacks_left = 5;
 
     //Initialize the game:
     //  - Set up window
@@ -63,12 +73,24 @@ int main() {
     ConCurInf.bVisible = FALSE;
     SetConsoleCursorInfo(h, &ConCurInf);
 
+    //Titlescreen
+    std::cout << "Press a number key for the level you want to load (1-9 by default, create your own level in the /files/ directory)";
+    current_level_num = _getch() - 48;
+    std::cout << "Level selected:" << current_level_num;
+    system("cls");
+
+
+
+
+
     //Draw the GUI
     drawGUI();
 
     //Load level 1
-    Level currentlevel;
-    writeLevelName("Level 1 - A New Beginning");
+    Level currentlevel(current_level_num);
+    writeLevelName("Game Created by Niko Savas (savas.ca)");
+
+    int attacks_left = currentlevel.bolts;
 
     //Get things on screen
     currentlevel.pushEntitiesTo(all_entities);
@@ -77,10 +99,8 @@ int main() {
     Entity player(25); //Create the entity (25 is player type)
     player.position.X = currentlevel.spawn.X; //Set player's position to the spawn
     player.position.Y = currentlevel.spawn.Y;
-    player.shield_count = 3;
+    player.shield_count = currentlevel.shields;
     all_entities.push_back (player); //Put player in our entity vector
-    updateGold(0);
-    updateKeys(0);
     updateAttacks(attacks_left);
 
     //This object holds all of our gfx layers
@@ -179,6 +199,19 @@ int main() {
 
             next_game_tick += SKIP_TICKS;
             loops++;
+        }
+
+        currentlevel.enemy_count = 0;
+        for(Entity ent : all_entities){
+            if(!ent.isDead && (ent.type==3 || ent.type==8)){
+                currentlevel.enemy_count = currentlevel.enemy_count + 1;
+            }
+        }
+        updateEnemies(currentlevel.enemy_count);
+        if(currentlevel.enemy_count==0){
+            system("cls");
+            std::cout << "YOU WIN." << std::endl;
+            std::cout << "Close and reopen this file to choose another level.";
         }
 
 

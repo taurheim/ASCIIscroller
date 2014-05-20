@@ -68,8 +68,8 @@ char game_gui[34][101]{
 "|    +++++   ++     ++++++                                                ++++++          +++++    |",
 "|   ++ ++++     +++++                                                          +++++     ++++ ++   |",
 "|      +++++  +++                                                                  +++  +++++      |",
-"|      +++++++           Gold:           Keys:              Bolts left:               +++++++      |",
-"|++++++++++++                                                                          ++++++++++++|",
+"|      +++++++                           Bolts left:                                  +++++++      |",
+"|++++++++++++                          Enemies left:                                   ++++++++++++|",
 "@--------------------------------------------------------------------------------------------------@"
 
 };
@@ -85,40 +85,29 @@ SMALL_RECT rcRegion = { 3, 2, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 };
 
 void writeLevelName(std::string name){
     _COORD draw_anchor;
-    draw_anchor.X = 35;
+    draw_anchor.X = 30;
     draw_anchor.Y = 28;
 
     SetConsoleCursorPosition(h,draw_anchor);
     std::cout << name;
 }
 
-void updateGold(int gold){
-    _COORD draw_anchor;
-    draw_anchor.X = 30;
-    draw_anchor.Y = 31;
-
-    SetConsoleCursorPosition(h,draw_anchor);
-    std::cout << gold;
-}
-
-void updateKeys(int keys){
-    _COORD draw_anchor;
-    draw_anchor.X = 46;
-    draw_anchor.Y = 31;
-
-    SetConsoleCursorPosition(h,draw_anchor);
-    std::cout << keys;
-}
-
 void updateAttacks(int attacks){
     _COORD draw_anchor;
-    draw_anchor.X = 71;
+    draw_anchor.X = 53;
     draw_anchor.Y = 31;
 
     SetConsoleCursorPosition(h,draw_anchor);
     std::cout << attacks;
 }
+void updateEnemies(int en){
+    _COORD draw_anchor;
+    draw_anchor.X = 53;
+    draw_anchor.Y = 32;
 
+    SetConsoleCursorPosition(h,draw_anchor);
+    std::cout << en;
+}
 void drawGUI(){
     //SetConsoleTextAttribute(h,0x70);
     for(int display=0;display<34;display++){
@@ -147,7 +136,7 @@ void drawLayer(char layer[][95], WORD col,bool wipe){
 
 
     //Old draw function
-    for(int d_y=0;d_y<22;d_y++){
+    for(int d_y=0;d_y<23;d_y++){
         draw_anchor.X = 3;
         for(int d_x=0;d_x<94;d_x++){
             if(wipe || (layer[d_y][d_x] != ' ' && layer[d_y][d_x] != '-' && layer[d_y][d_x] != '\0')){

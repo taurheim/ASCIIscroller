@@ -1,0 +1,9 @@
+1. Copy level_template.txt into a new text file named level__.txt, where __ is the level number
+2. Create the level:
+	@ = Player spawn location
+	m = Bat
+	3 = Mage
+	# = Wall
+4. On the second last line of the file (where you see 3, put the number of shields the player gets (0 to 3)
+5. On the last line of the file (where 999 is on the template), put the number of bolts the player gets to complete the level.
+6. Save the file, load it!
